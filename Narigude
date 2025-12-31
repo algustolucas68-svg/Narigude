@@ -1,0 +1,500 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Narigude",
+   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "Narigude abrindo...",
+   LoadingSubtitle = "Por ?",
+   ShowText = "Narigude", -- for mobile users to unhide rayfield, change if you'd like
+   Theme = "Ocean", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+   ToggleUIKeybind = "P", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Big Hub"
+   },
+
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Untitled",
+      Subtitle = "Key System",
+      Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local Jogador = Window:CreateTab("Jogador", 6031280882) -- Title, Image
+
+local Combate = Window:CreateTab("💀 Combate")
+
+local Dinheiro = Window:CreateTab("Dinheiro", 6031280882) -- Title, Image
+
+Rayfield:Notify({
+   Title = "Narigude funcionando!",
+   Content = "Criado por ?",
+   Duration = 6.5,
+   Image = 4483362458,
+})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local flying = false
+local bv, bg
+
+local Fly = Jogador:CreateButton({
+	Name = "Fly",
+	Callback = function()
+		flying = not flying
+
+		local char = player.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+
+		if flying then
+			bv = Instance.new("BodyVelocity")
+			bv.Velocity = Vector3.zero
+			bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+			bv.Parent = hrp
+
+			bg = Instance.new("BodyGyro")
+			bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+			bg.CFrame = hrp.CFrame
+			bg.Parent = hrp
+
+			RunService.RenderStepped:Connect(function()
+				if not flying then return end
+				local cam = workspace.CurrentCamera
+				local move = Vector3.zero
+
+				if UserInputService:IsKeyDown(Enum.KeyCode.W) then move += cam.CFrame.LookVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.S) then move -= cam.CFrame.LookVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.A) then move -= cam.CFrame.RightVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.D) then move += cam.CFrame.RightVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move += cam.CFrame.UpVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then move -= cam.CFrame.UpVector end
+
+				bv.Velocity = move * 60
+				bg.CFrame = cam.CFrame
+			end)
+		else
+			if bv then bv:Destroy() bv = nil end
+			if bg then bg:Destroy() bg = nil end
+		end
+	end,
+})
+
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local noclipConnection
+
+local Toggle = Jogador:CreateToggle({
+	Name = "Noclip",
+	CurrentValue = false,
+	Flag = "NoclipToggle",
+	Callback = function(Value)
+		if Value then
+			noclipConnection = RunService.Stepped:Connect(function()
+				local char = player.Character
+				if not char then return end
+
+				for _, part in ipairs(char:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = false
+					end
+				end
+			end)
+		else
+			if noclipConnection then
+				noclipConnection:Disconnect()
+				noclipConnection = nil
+			end
+
+			local char = player.Character
+			if char then
+				for _, part in ipairs(char:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = true
+					end
+				end
+			end
+		end
+	end,
+})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local ESPAtivo = false
+local Highlights = {}
+local NameTags = {}
+
+local function CriarNameTag(player)
+    local char = player.Character
+    if char and char:FindFirstChild("Head") then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Adornee = char.Head
+        billboard.Size = UDim2.new(0, 100, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 2, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Parent = game:GetService("CoreGui")
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1,0,1,0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextColor3 = Color3.fromRGB(255,255,255)
+        textLabel.TextStrokeTransparency = 0
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.TextScaled = true
+        textLabel.Text = player.Name
+        textLabel.Parent = billboard
+
+        NameTags[player] = billboard
+    end
+end
+
+local function AtualizarESP()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local char = player.Character
+            if char and not Highlights[player] then
+                local highlight = Instance.new("Highlight")
+                highlight.Adornee = char
+                highlight.FillTransparency = 1
+                highlight.OutlineColor = Color3.fromRGB(128, 0, 128)
+                highlight.OutlineTransparency = 0
+                highlight.Parent = game:GetService("CoreGui")
+                Highlights[player] = highlight
+            end
+            if char and not NameTags[player] then
+                CriarNameTag(player)
+            end
+        end
+    end
+end
+
+local function RemoverESP()
+    for player, highlight in pairs(Highlights) do
+        highlight:Destroy()
+    end
+    Highlights = {}
+
+    for player, tag in pairs(NameTags) do
+        tag:Destroy()
+    end
+    NameTags = {}
+end
+
+RunService.RenderStepped:Connect(function()
+    if ESPAtivo then
+        AtualizarESP()
+    end
+end)
+
+local Toggle = Jogador:CreateToggle({ 
+   Name = "ESP", 
+   CurrentValue = false,
+   Flag = "ESP",
+   Callback = function(Value)
+       ESPAtivo = Value
+       if not ESPAtivo then
+           RemoverESP()
+       end
+   end,
+})
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+
+local TPAtivo = false
+
+local Toggle = Jogador:CreateToggle({ 
+    Name = "TP Tool", 
+    CurrentValue = false,
+    Flag = "TPTool",
+    Callback = function(Value)
+        TPAtivo = Value
+    end,
+})
+
+local function TeleportToMouse()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        local mouseHit = Mouse.Hit
+        hrp.CFrame = CFrame.new(mouseHit.Position + Vector3.new(0, 3, 0))
+    end
+end
+
+Mouse.Button1Down:Connect(function()
+    if TPAtivo then
+        TeleportToMouse()
+    end
+end)
+
+
+
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local Walkspeed = Jogador:CreateSlider({
+	Name = "Walkspeed",
+	Range = {0, 100},
+	Increment = 10,
+	Suffix = "Walkspeed",
+	CurrentValue = 10,
+	Flag = "Speed1",
+	Callback = function(Value)
+		local char = player.Character
+		if char and char:FindFirstChild("Humanoid") then
+			char.Humanoid.WalkSpeed = Value
+		end
+	end,
+})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+
+local AimbotAtivo = false
+local Conexao
+
+local function IsVisible(targetPart)
+    local origin = Camera.CFrame.Position
+    local direction = (targetPart.Position - origin)
+
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+    rayParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    rayParams.IgnoreWater = true
+
+    local result = workspace:Raycast(origin, direction, rayParams)
+
+    if result then
+        return result.Instance:IsDescendantOf(targetPart.Parent)
+    end
+
+    return false
+end
+
+local function GetClosestPlayer()
+    local closest, shortestDistance = nil, math.huge
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer
+        and player.Character
+        and player.Character:FindFirstChild("Head")
+        and player.Character:FindFirstChild("Humanoid")
+        and player.Character.Humanoid.Health > 0
+        and player.Team ~= LocalPlayer.Team then
+
+            local head = player.Character.Head
+            local pos, visivel = Camera:WorldToViewportPoint(head.Position)
+
+            if visivel and IsVisible(head) then
+                local dist = (Vector2.new(pos.X, pos.Y)
+                    - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
+
+                if dist < shortestDistance then
+                    shortestDistance = dist
+                    closest = player
+                end
+            end
+        end
+    end
+
+    return closest
+end
+
+local Toggle = Combate:CreateToggle({
+    Name = "Aimbot",
+    CurrentValue = false,
+    Flag = "ToggleAimbot",
+    Callback = function(Value)
+        AimbotAtivo = Value
+
+        if AimbotAtivo then
+            Conexao = RunService.RenderStepped:Connect(function()
+                local alvo = GetClosestPlayer()
+                if alvo and alvo.Character and alvo.Character:FindFirstChild("Head") then
+                    Camera.CFrame = CFrame.new(
+                        Camera.CFrame.Position,
+                        alvo.Character.Head.Position
+                    )
+                end
+            end)
+        else
+            if Conexao then
+                Conexao:Disconnect()
+                Conexao = nil
+            end
+        end
+    end,
+})
+
+
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local HeadSize = 10
+local IsHitboxActive = false
+local HitboxTransparency = 0.7
+
+local function UpdateHitboxes()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team then
+            local char = player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.Size = Vector3.new(HeadSize, HeadSize, HeadSize)
+                hrp.Transparency = HitboxTransparency
+                hrp.Material = Enum.Material.Neon
+                hrp.BrickColor = BrickColor.new("Red")
+                hrp.CanCollide = false
+            end
+        end
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    if IsHitboxActive then
+        UpdateHitboxes()
+    end
+end)
+
+local HitboxToggle = Combate:CreateToggle({
+    Name = "Hitbox",
+    CurrentValue = false,
+    Flag = "Expander",
+    Callback = function(Value)
+        IsHitboxActive = Value
+        if not Value then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team then
+                    local char = player.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        hrp.Size = Vector3.new(2,2,1)
+                        hrp.Transparency = 1
+                        hrp.Material = Enum.Material.Plastic
+                        hrp.BrickColor = BrickColor.new("Medium stone grey")
+                        hrp.CanCollide = true
+                    end
+                end
+            end
+        end
+    end,
+})
+
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local InfiniteAmmo = false
+local AmmoLoop
+
+local Toggle = Combate:CreateToggle({ 
+    Name = "Munição infinita", 
+    CurrentValue = false,
+    Flag = "MunicaoInfinita",
+    Callback = function(Value)
+        InfiniteAmmo = Value
+
+        if InfiniteAmmo then
+            AmmoLoop = task.spawn(function()
+                while InfiniteAmmo do
+                    local char = LocalPlayer.Character
+                    if char then
+                        for _, tool in ipairs(char:GetChildren()) do
+                            if tool:IsA("Model") and tool:FindFirstChild("Ammo") then
+                                tool.Ammo.Value = tool.Ammo.MaxValue or tool.Ammo.Value
+                            end
+                        end
+                    end
+                    task.wait()
+                end
+            end)
+        end
+    end,
+})
+
+
+local TransparencySlider = Combate:CreateSlider({
+    Name = "Transparência",
+    Range = {0, 1},
+    Increment = 0.1,
+    Suffix = "",
+    CurrentValue = HitboxTransparency,
+    Flag = "Transparency",
+    Callback = function(Value)
+        HitboxTransparency = Value
+        if IsHitboxActive then
+            UpdateHitboxes()
+        end
+    end,
+})
+
+
+local HitboxSizeSlider = Combate:CreateSlider({
+    Name = "Hitbox Size",
+    Range = {0, 100},
+    Increment = 1,
+    Suffix = "",
+    CurrentValue = HeadSize,
+    Flag = "HitboxSizeSlider",
+    Callback = function(Value)
+        HeadSize = Value
+        if IsDisabled then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer then
+                    local char = player.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        hrp.Size = Vector3.new(HeadSize, HeadSize, HeadSize)
+                    end
+                end
+            end
+        end
+    end,
+})
+
+
+local Button = Dinheiro:CreateButton({
+    Name = "Adicionar 50k",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Servidor.UpdateMoney:FireServer(50000)
+    end,
+})
+
+local Button = Dinheiro:CreateButton({
+    Name = "Remover 50k",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Servidor.UpdateMoney:FireServer(-50000)
+    end,
+})
