@@ -41,7 +41,9 @@ local Jogador = Window:CreateTab("Jogador", 6031280882) -- Title, Image
 
 local Combate = Window:CreateTab("💀 Combate")
 
-local Dinheiro = Window:CreateTab("Dinheiro", 6031280882) -- Title, Image
+local Dinheiro = Window:CreateTab("💵 Dinheiro") -- Title, Image
+
+local Respostas = Window:CreateTab("💭 Respostas") -- Title, Image
 
 Rayfield:Notify({
    Title = "Narigude funcionando!",
@@ -275,6 +277,8 @@ local Walkspeed = Jogador:CreateSlider({
 	end,
 })
 
+
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
@@ -484,7 +488,6 @@ local HitboxSizeSlider = Combate:CreateSlider({
     end,
 })
 
-
 local Button = Dinheiro:CreateButton({
     Name = "Adicionar 50k",
     Callback = function()
@@ -497,4 +500,76 @@ local Button = Dinheiro:CreateButton({
     Callback = function()
         game:GetService("ReplicatedStorage").Servidor.UpdateMoney:FireServer(-50000)
     end,
+})
+
+local TextChatService = game:GetService("TextChatService")
+
+Respostas:CreateButton({
+    Name = "CIE",
+    Callback = function()
+        local channel = TextChatService.ChatInputBarConfiguration.TargetTextChannel
+        if channel then
+            channel:SendAsync("O Centro de Inteligência do Exército é a unidade responsável por manter a segurança cibernética do Exército Brasileiro, mantendo a ordem e a disciplina na parte administrativa do Exército.")
+        end
+    end
+})
+
+local TextChatService = game:GetService("TextChatService")
+
+Respostas:CreateButton({
+    Name = "PE",
+    Callback = function()
+        local channel = TextChatService.ChatInputBarConfiguration.TargetTextChannel
+        if channel then
+            channel:SendAsync("O Batalhão de Polícia do Exército é encarregado de vigia instalações, mantém a disciplina entre os militares, faz a segurança de autoridades e de localidades.")
+        end
+    end
+})
+
+local TextChatService = game:GetService("TextChatService")
+
+Respostas:CreateButton({
+    Name = "FE",
+    Callback = function()
+        local channel = TextChatService.ChatInputBarConfiguration.TargetTextChannel
+        if channel then
+            channel:SendAsync("O Batalhão de Forças Especiais é responsável por manter a paz no âmbito do Exército Brasileiro. Sendo indicados para cumprir missões de alto risco.")
+        end
+    end
+})
+
+local TextChatService = game:GetService("TextChatService")
+
+Respostas:CreateButton({
+    Name = "BAC",
+    Callback = function()
+        local channel = TextChatService.ChatInputBarConfiguration.TargetTextChannel
+        if channel then
+            channel:SendAsync("O Batalhão de Ações de Comandos é responsável por manter a paz no âmbito do Exército Brasileiro. Sendo indicados para cumprir missões de alto risco.")
+        end
+    end
+})
+
+local TextChatService = game:GetService("TextChatService")
+
+Respostas:CreateButton({
+    Name = "ESA",
+    Callback = function()
+        local channel = TextChatService.ChatInputBarConfiguration.TargetTextChannel
+        if channel then
+            channel:SendAsync("A Escola de Sargentos das Armas é responsável por formar Cabos em Sargentos, preparando-os para iniciar sua nova fase na carreira como Graduado com responsabilidade e ética.")
+        end
+    end
+})
+
+local TextChatService = game:GetService("TextChatService")
+
+Respostas:CreateButton({
+    Name = "EsPCEx",
+    Callback = function()
+        local channel = TextChatService.ChatInputBarConfiguration.TargetTextChannel
+        if channel then
+            channel:SendAsync("A EsPCEx tem como missão preparar futuros Oficiais, proporcionando o treinamento necessário para capacitá-los a desempenharem com excelência suas futuras funções no Exército Brasileiro.")
+        end
+    end
 })
