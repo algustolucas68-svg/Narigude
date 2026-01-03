@@ -45,6 +45,8 @@ local Dinheiro = Window:CreateTab("💵 Dinheiro") -- Title, Image
 
 local Respostas = Window:CreateTab("💭 Respostas") -- Title, Image
 
+local Respostas = Window:CreateTab("💭 Respostas") -- Title, Image
+
 Rayfield:Notify({
    Title = "Narigude funcionando!",
    Content = "Criado por ?",
@@ -175,21 +177,30 @@ local function CriarNameTag(player)
     end
 end
 
+local function CriarHighlight(player)
+    local char = player.Character
+    if char then
+        local highlight = Instance.new("Highlight")
+        highlight.Adornee = char
+        highlight.FillTransparency = 1
+        highlight.OutlineColor = Color3.fromRGB(128, 0, 128)
+        highlight.OutlineTransparency = 0
+        highlight.Parent = game:GetService("CoreGui")
+        Highlights[player] = highlight
+    end
+end
+
 local function AtualizarESP()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
             local char = player.Character
-            if char and not Highlights[player] then
-                local highlight = Instance.new("Highlight")
-                highlight.Adornee = char
-                highlight.FillTransparency = 1
-                highlight.OutlineColor = Color3.fromRGB(128, 0, 128)
-                highlight.OutlineTransparency = 0
-                highlight.Parent = game:GetService("CoreGui")
-                Highlights[player] = highlight
-            end
-            if char and not NameTags[player] then
-                CriarNameTag(player)
+            if char then
+                if not Highlights[player] then
+                    CriarHighlight(player)
+                end
+                if not NameTags[player] then
+                    CriarNameTag(player)
+                end
             end
         end
     end
@@ -207,23 +218,62 @@ local function RemoverESP()
     NameTags = {}
 end
 
+local function ConectarCharacter(player)
+    player.CharacterAdded:Connect(function()
+        if Highlights[player] then
+            Highlights[player]:Destroy()
+            Highlights[player] = nil
+        end
+        if NameTags[player] then
+            NameTags[player]:Destroy()
+            NameTags[player] = nil
+        end
+        if ESPAtivo then
+            AtualizarESP()
+        end
+    end)
+
+    player.CharacterRemoving:Connect(function()
+        if Highlights[player] then
+            Highlights[player]:Destroy()
+            Highlights[player] = nil
+        end
+        if NameTags[player] then
+            NameTags[player]:Destroy()
+            NameTags[player] = nil
+        end
+    end)
+end
+
+for _, player in pairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer then
+        ConectarCharacter(player)
+    end
+end
+
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer then
+        ConectarCharacter(player)
+    end
+end)
+
 RunService.RenderStepped:Connect(function()
     if ESPAtivo then
         AtualizarESP()
     end
 end)
 
-local Toggle = Jogador:CreateToggle({ 
-   Name = "ESP", 
-   CurrentValue = false,
-   Flag = "ESP",
-   Callback = function(Value)
-       ESPAtivo = Value
-       if not ESPAtivo then
-           RemoverESP()
-       end
-   end,
-})
+local Toggle = Jogador:CreateToggle({
+    Name = "ESP",
+    CurrentValue = false,
+    Flag = "ESP",
+    Callback = function(Value)
+      ESPAtivo = Value
+      if not ESPAtivo then
+        RemoverESP()
+      end
+    end,
+    })
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -558,6 +608,18 @@ Respostas:CreateButton({
         local channel = TextChatService.ChatInputBarConfiguration.TargetTextChannel
         if channel then
             channel:SendAsync("A Escola de Sargentos das Armas é responsável por formar Cabos em Sargentos, preparando-os para iniciar sua nova fase na carreira como Graduado com responsabilidade e ética.")
+        end
+    end
+})
+
+local TextChatService = game:GetService("TextChatService")
+
+Respostas:CreateButton({
+    Name = "EsPCEx",
+    Callback = function()
+        local channel = TextChatService.ChatInputBarConfiguration.TargetTextChannel
+        if channel then
+            channel:SendAsync("A EsPCEx tem como missão preparar futuros Oficiais, proporcionando o treinamento necessário para capacitá-los a desempenharem com excelência suas futuras funções no Exército Brasileiro.")
         end
     end
 })
