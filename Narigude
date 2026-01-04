@@ -45,8 +45,6 @@ local Dinheiro = Window:CreateTab("💵 Dinheiro") -- Title, Image
 
 local Respostas = Window:CreateTab("💭 Respostas") -- Title, Image
 
-local Respostas = Window:CreateTab("💭 Respostas") -- Title, Image
-
 Rayfield:Notify({
    Title = "Narigude funcionando!",
    Content = "Criado por ?",
