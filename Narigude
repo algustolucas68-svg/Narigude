@@ -45,6 +45,8 @@ local Dinheiro = Window:CreateTab("💵 Dinheiro") -- Title, Image
 
 local Respostas = Window:CreateTab("💭 Respostas") -- Title, Image
 
+local Scripts = Window:CreateTab("📋 Scripts") -- Title, Image
+
 Rayfield:Notify({
    Title = "Narigude funcionando!",
    Content = "Criado por ?",
@@ -622,14 +624,58 @@ Respostas:CreateButton({
     end
 })
 
-local TextChatService = game:GetService("TextChatService")
+local function ExecutarScript(url)
+    local ok, err = pcall(function()
+        local code = game:HttpGet(url)
+        if type(code) ~= "string" or code == "" then return end
+        loadstring(code)()
+    end)
 
-Respostas:CreateButton({
-    Name = "EsPCEx",
+    if not ok then
+        warn("Erro ao executar script externo:", err)
+    end
+end
+
+Scripts:CreateButton({
+    Name = "Infinite Yield",
     Callback = function()
-        local channel = TextChatService.ChatInputBarConfiguration.TargetTextChannel
-        if channel then
-            channel:SendAsync("A EsPCEx tem como missão preparar futuros Oficiais, proporcionando o treinamento necessário para capacitá-los a desempenharem com excelência suas futuras funções no Exército Brasileiro.")
+        pcall(function()
+            loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-43437"))()
+        end)
+    end
+})
+
+local AutoJJsAtivo = false
+
+Scripts:CreateButton({
+    Name = "Auto JJs",
+    Callback = function()
+        if AutoJJsAtivo then
+            warn("AutoJJs já está ativo")
+            return
         end
+
+        AutoJJsAtivo = true
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Zv-yz/AutoJJs/main/Main.lua"))(Options)
+        end)
+    end
+})
+
+
+local AutoJJsAtivo = false
+
+Scripts:CreateButton({
+    Name = "Equinox Aimbot",
+    Callback = function()
+        if AutoJJsAtivo then
+            warn("Equinox Aimbot já está ativo")
+            return
+        end
+
+        AutoJJsAtivo = true
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Xxtan31/Equinox-Hub/main/aimbot.lua"))(Options)
+        end)
     end
 })
